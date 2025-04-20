@@ -2,15 +2,13 @@
 import pickle
 from re import T
 import sys
-from pathlib import Path
 import numpy as np
-from PIL import Image
 from pathlib import Path
 import matplotlib.pyplot as plt
-# 获取当前脚本的父目录的父目录（即 deep-learning-from-scratch/）
+# 获取当前脚本的父目录的父目录
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))  # 将根目录加入 Python 路径
-from deeplearning import two_layer_net
+from gradient import two_layer_net
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))  
 def load_mnist(normalize=True, flatten=True, one_hot_label=False):
