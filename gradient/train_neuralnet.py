@@ -43,7 +43,7 @@ def img_show(img):
     pil_img.show()
 network = two_layer_net.TwoLayerNet(input_size=784, hidden_size=50, output_size=10)
 (x_train, t_train), (x_test, t_test) = load_mnist(normalize=True,one_hot_label=True)
-iters_num = 1000  
+iters_num = 10000  
 train_size = x_train.shape[0]
 batch_size = 100
 learning_rate = 0.1
@@ -57,7 +57,7 @@ for i in range(iters_num):
     x_batch = x_train[batch_mask]
     t_batch = t_train[batch_mask]
     # 参数更新
-    network.params_update(x_batch, t_batch,learning_rate)
+    network.params_update_with_gradient(x_batch, t_batch,learning_rate)
     loss = network.loss(x_batch, t_batch)
     train_loss_list.append(loss)
     if i % iter_per_epoch == 0:
