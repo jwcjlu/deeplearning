@@ -21,13 +21,33 @@ class TwoLayerNet:
       y = self.predict(x)
       return cross_entropy_error(y, t)
 
-    def params_update(self,x,t,rate=0.1):
+    def params_update_with_numerical_gradient(self,x,t,rate=0.1):
         params = self.params
         loss = lambda W: self.loss(x, t)  
-        params['W1']-=numerical_gradient(loss,params['W1'])*rate
-        params['b1']-=numerical_gradient(loss,params['b1'])*rate
-        params['W2']-=numerical_gradient(loss,params['W2'])*rate
-        params['b2']-=numerical_gradient(loss,params['b2'])*rate
+        self.params['W1']-=numerical_gradient(loss,params['W1'])*rate
+        self.params['b1']-=numerical_gradient(loss,params['b1'])*rate
+        self.params['W2']-=numerical_gradient(loss,params['W2'])*rate
+        self.params['b2']-=numerical_gradient(loss,params['b2'])*rate
+    def params_update_with_gradient(self,x,t,rate=0.1):
+        params = self.params
+        W1, W2 = params['W1'], params['W2']
+        b1, b2 = params['b1'], params['b2']
+        batch_num = x.shape[0]
+        # forward
+        a1 = np.dot(x, W1) + b1
+        z1 = sigmoid(a1)
+        a2 = np.dot(z1, W2) + b2
+        y = softmax(a2)
+  
+        # backward
+        dy = (y - t) / batch_num
+        self.params['W2'] -= np.dot(z1.T, dy)*rate
+        self.params['b2'] -= np.sum(dy, axis=0)*rate
+        
+        dz1 = np.dot(dy, W2.T)
+        da1 = sigmoid_grad(a1) * dz1
+        self.params['W1'] -= np.dot(x.T, da1)*rate
+        self.params['b1'] -= np.sum(da1, axis=0)*rate
 
     def accuracy(self, x, t):
         y = self.predict(x)
@@ -69,3 +89,6 @@ def cross_entropy_error(y, t):
         t = t.argmax(axis=1)
       batch_size = y.shape[0]
       return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-7)) / batch_size
+
+def sigmoid_grad(x):
+    return (1.0 - sigmoid(x)) * sigmoid(x)
