@@ -44,8 +44,8 @@ class TwoLayerNet:
         self.params['W2'] -= np.dot(z1.T, dy)*rate
         self.params['b2'] -= np.sum(dy, axis=0)*rate
         
-        dz1 = np.dot(dy, W2.T)
-        da1 = sigmoid_grad(a1) * dz1
+        dz1 = np.dot(dy, W2.T)#dz1导数
+        da1 = sigmoid_grad(a1) * dz1#da1导数
         self.params['W1'] -= np.dot(x.T, da1)*rate
         self.params['b1'] -= np.sum(da1, axis=0)*rate
 
@@ -78,7 +78,7 @@ def sigmoid(x):
 
 ##输出函数softmax实现
 def softmax(x):
-    x = x - np.max(x, axis=-1, keepdims=True)   # オーバーフロー対策
+    x = x - np.max(x, axis=-1, keepdims=True)  # 溢出对策
     return np.exp(x) / np.sum(np.exp(x), axis=-1, keepdims=True)
 ## 交叉熵误差
 def cross_entropy_error(y, t):
