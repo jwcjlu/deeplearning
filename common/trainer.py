@@ -1,5 +1,9 @@
+from re import I
 import numpy as np
 import matplotlib.pyplot as plt
+import common.utils as clip_grads
+from common.optimizer import *
+import dask.array as da
 class Trainer:
     def __init__(self, model, optimizer):
         self.model = model
@@ -26,6 +30,13 @@ class Trainer:
             for iters in range(max_iters):
                 batch_x = x[iters*batch_size:(iters+1)*batch_size]
                 batch_t = t[iters*batch_size:(iters+1)*batch_size]
+                   # 确保输入数据格式正确
+                if not isinstance(batch_x, np.ndarray):
+                    #batch_x = np.array(batch_x)
+                    batch_x=convert_to_numpy(batch_x)
+                if not isinstance(batch_t, np.ndarray):
+                    batch_t=convert_to_numpy(batch_t)
+                   # batch_t = np.array(batch_t)
 
                 # 计算梯度
                 loss = model.forward(batch_x, batch_t)
@@ -55,6 +66,20 @@ class Trainer:
         plt.xlabel('iterations (x' + str(self.eval_interval) + ')')
         plt.ylabel('loss')
         plt.show()
+
+def convert_to_numpy(array):
+    if isinstance(array, np.ndarray):
+        return array
+    elif hasattr(array, "get"):       # CuPy
+        return array.get()
+    elif hasattr(array, "compute"):   # Dask
+        return array.compute()
+    elif hasattr(array, "numpy"):     # PyTorch/TensorFlow
+        return array.numpy()
+    else:
+        return np.array(array)        # 其他情况尝试转换
+
+
 
 def remove_duplicate(params, grads):
     """
