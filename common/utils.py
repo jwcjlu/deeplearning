@@ -42,7 +42,10 @@ def cos_similarity(x,y,eps=1e-8):
     return np.dot(nx,ny)
 
 def most_similar(query,wordtoId,idtoWord,wordMatrix,top=5):
-   #取出查询词
+    ##1.取出查询词的单词向量。
+    ##2.分别求得查询词的单词向量和其他所有单词向量的余弦相似度。
+    ##3.基于余弦相似度的结果，按降序显示它们的值
+    #取出查询词
     if query not in wordtoId:
         print("%s is not found"%query)
         return
@@ -105,3 +108,66 @@ def convert_one_hot(corpus,vocab_size):
             for idx_1,word_id in enumerate(word_ids):
                 one_hot[idx_0,idx_1,word_id]=1
     return one_hot
+
+def to_cpu(x):
+    import numpy
+    if type(x)==numpy.ndarray:
+        return x    
+    return np.asnumpy(x)
+
+def to_gpu(x):
+    import cupy
+    if type(x)==cupy.ndarray:
+        return  x   
+    return cupy.asarray(x)
+def clip_grads(grads,max_norm):
+    total_norm=0
+    for grad in grads:
+        total_norm+=np.sum(grad**2)
+    total_norm=np.sqrt(total_norm)
+    rate=max_norm/(total_norm+1e-6)
+    if rate<1:
+        for grad in grads:
+            grad*=rate
+
+def analogy(a,b,c,wordtoId,idtoWord,wordMatrix,top=5):
+    for word in (a,b,c):
+        if word not in wordtoId:
+            print('%s is not found' %word)
+            return
+    print('\n[analogy]',a,':',b,'=',c,':?')
+    a_vec,b_vec,c_vec=wordMatrix[wordtoId[a]],wordMatrix[wordtoId[b]],wordMatrix[wordtoId[c]]
+    query_vec=b_vec-a_vec+c_vec
+    query_vec=normalize(query_vec)
+    similarity=np.dot(wordMatrix,query_vec)
+    if a in ['i','you','he','she','it','we','they']:
+        top+=1
+    count=0
+    for i in (-1*similarity).argsort():
+        if np.isnan(similarity[i]):
+            continue
+        if idtoWord[i] in [a,b,c]:
+            continue
+        print(' {0}: {1}'.format(idtoWord[i],similarity[i]))
+        count+=1
+        if count>=top:
+            return  
+
+def normalize(x):
+    """
+    Normalize a vector to have unit length
+    
+    Parameters:
+    -----------
+    x : numpy.ndarray
+        Input vector to normalize
+        
+    Returns:
+    --------
+    numpy.ndarray
+        Normalized vector
+    """
+    if x.ndim == 1:
+        return x / (np.sqrt(np.sum(x ** 2)) + 1e-8)
+    else:
+        return x / (np.sqrt(np.sum(x ** 2, axis=1, keepdims=True)) + 1e-8)

@@ -11,7 +11,6 @@ class SGD:
         for key, _ in  enumerate(params):
             params[key] -= self.lr * grads[key] 
 
-
 class Momentum:
 
     """Momentum SGD"""
