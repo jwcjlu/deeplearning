@@ -1,7 +1,7 @@
 from re import I
 import numpy as np
 import matplotlib.pyplot as plt
-import common.utils as clip_grads
+from common.utils import clip_grads
 from common.optimizer import *
 import dask.array as da
 class Trainer:
@@ -189,4 +189,3 @@ class RnnlmTrainer:
         plt.xlabel('iterations (x' + str(self.eval_interval) + ')')
         plt.ylabel('perplexity')    
         plt.show()      
-    

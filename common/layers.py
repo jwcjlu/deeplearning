@@ -99,7 +99,8 @@ class SigmoidWithLoss:
         return dx
 
 def sigmoid(x): 
-    return 1 / (1 + np.exp(-x))
+    x_clipped = np.clip(x, -50, 50)  # 限制x范围，避免exp溢出
+    return 1 / (1 + np.exp(-x_clipped))
 
 def sigmoid_grad(x):
     return (1.0 - sigmoid(x)) * sigmoid(x)
